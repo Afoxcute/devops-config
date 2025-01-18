@@ -1,0 +1,41 @@
+name: Build/Deploy Frontend-Pharmacist - Prod
+
+on:
+  push:
+    branches:
+      - prod  # the branch that will trigger the workflow
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '>=18.0.0'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build project
+      run: npm run generate
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-north-1
+
+
+    - name: Deploy to S3
+      run: |
+        aws s3 cp --recursive ./dist s3://intelrxinventory/
+
+    - name: Invalidate CloudFront Cache (Distribution EXBF0AA3YUYNR)
+      run: |
+        aws cloudfront create-invalidation --distribution-id EXBF0AA3YUYNR --path /\*
