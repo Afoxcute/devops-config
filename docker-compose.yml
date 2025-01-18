@@ -1,0 +1,17 @@
+version: '3'
+services:
+  app:
+#    build:
+#      context: ./
+#      dockerfile: Dockerfile
+    image: afoxcute/prod:pharmacist
+    container_name: frontend_pharmacist
+    restart: unless-stopped
+    volumes:
+      - ./Frontend-Pharmacist:/usr/src/app
+      - Frontend-Pharmacist_node_modules:/usr/src/app/node_modules
+    ports:
+      - 7031:80
+volumes:
+ Frontend-Pharmacist_node_modules:
+
